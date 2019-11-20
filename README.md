@@ -2,6 +2,19 @@
 
 ViS (read as *Vice*) is an API that produces a text summary of a video based on a youtube link.
 
+- [ViS - Video Summary](#vis---video-summary)
+  - [ViS API](#vis-api)
+    - [Function *f_api*](#function-fapi)
+    - [Function *f_youtube*](#function-fyoutube)
+    - [Function *f_transcript*](#function-ftranscript)
+    - [Function **f_summary**](#function-fsummary)
+  - [ViS Frontend](#vis-frontend)
+  - [Glossary](#glossary)
+
+
+<hr />
+
+
 ## ViS API
 
 Simplified overview of the API:
@@ -12,36 +25,7 @@ Simplified overview of the API:
 4. The API generates a summary of the transcript (function **f_summary**).
 
 
-The ViS API works as follows:
-
-1) A client (a user or a web application) calls the ViS API.
-   * This request must contain a youtube_url.
-   * The API must validate the youtube_url.
-     * if the URL is invalid, the API responds with a status code 400 and an error message.
-2) The ViS API processes the youtube video:
-   1. first, verify if the video exists in the GCS
-      * if it does, great, return a 200 status code.
-   2. otherwise, the ViS API calls the function *f_youtube*. This function:
-      1. takes a youtube_url as input parameter.
-      2. donwloads and stores **metadata** (title, author, duration, cover image, etc.) regarding the video. (400 status code if this fails, as it is likely a problem with the video url provided)
-      3. downloads and stores the **video**. (500 status code if this fails)
-      4. transforms the video into a **FLAC** audio file. (500 status code if this fails)
-3) The ViS API generates the **full transcript**:
-   1. first, verify if the full transcript already exists in the GCS
-      * if it does, great, return 200 status code
-   2. otherwise, the ViS API calls the function *f_transcript*. This function:
-      1. takes a GCS URI that points to a FLAC audio file. (404 status code if the file can not be found)
-      2. generates a full transcript and stores it into the GCS. (500 status code if this fails)
-4) The ViS API generates the **summary**:
-   1. first, verify if the summary already exists in the GCS
-      * if it does, great, return 200 status code.
-   2. otherwise, the ViS API calls the function *f_summary*. This function:
-      1. takes a GCS URI that points to a text file, and a summary ratio value (between 0 and 1). (400 if this fails)
-      2. generates the summary and store it into the GCS (500 if this fails)
-
-### Functions
-
-#### *f_api*
+### Function *f_api*
 
 The **f_api** function implements the main API. It:
   * takes a youtube_url (required) and a summary_ratio (optional)
@@ -50,7 +34,7 @@ The **f_api** function implements the main API. It:
     * status code 200 if success; otherwise, the success code of the failed function.
     * { transcript, summary, metadata }
 
-#### *f_youtube*
+### Function *f_youtube*
 
 The **f_youtube** function:
   * takes a youtube_url (required)
@@ -65,7 +49,7 @@ The **f_youtube** function:
     * returns 500 if this fails.
   * returns object that points to the stored files: { metada_URI, video_URI, flac_URI }
 
-#### *f_transcript*
+### Function *f_transcript*
 
 The **f_transcript** function:
   * takes a GCS URI that points to a FLAC file (required)
@@ -75,7 +59,7 @@ The **f_transcript** function:
     * returns 500 if this fails
   * returns object that points to the stored file: { transcript_URI }
 
-#### **f_summary**
+### Function **f_summary**
 
 The **f_summary** function:
   * takes a GCS URI that points to a *transcript* text file (required) and a summary_ratio (optional)
@@ -100,6 +84,10 @@ Features:
   * display loading info, status update and estimated processing time.
 
 
+<hr />
+
+
 ## Glossary
 
 * GCS - Google Cloud Storage
+
