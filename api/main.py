@@ -249,10 +249,6 @@ def get_summary(input_filename, output_filename, ratio_summary=0.5):
 
 
 def main(request):
-    # Set CORS headers for the main request
-    headers = {
-        'Access-Control-Allow-Origin': '*'
-    }
     # bulk of function
     youtube_url = get_youtube_url(request)
     if not youtube_url:

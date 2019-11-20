@@ -25,7 +25,7 @@ Simplified overview of the API:
 4. The API generates a summary of the transcript (function **f_summary**).
 
 Note: these *functions* are not actually google cloud functions, although they could be. The reason to not make them separate functions is two-fold: 1) less overhead in terms of deploying multiple functions; 2) uncertainty around how to re-use code across multiple functions, particularly regarding the google cloud storage logic. Thus, these functions will be logically isolated in their own files, but the API will be a single google cloud function. 
- 
+
 ### Function *f_api*
 
 The **f_api** function implements the main API. It:
