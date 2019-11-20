@@ -15,7 +15,7 @@ class InputForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    window.open(`/summary/${this.state.value}`)
+    window.open(`/summary?youtube_url=${this.state.value}`)
   }
 
   render() {

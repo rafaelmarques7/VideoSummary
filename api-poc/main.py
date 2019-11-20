@@ -225,7 +225,7 @@ def main(request):
     youtube_url = get_youtube_url(request)
     if not youtube_url:
         print('ERROR: no youtube_url was provided. exiting')
-        response = { "statusCode": 400, "error": "You must provide a valid youtube_url as a query string parameter"}
+        response = { "statusCode": 400, "error": "You must provide a valid youtube_url as a query string parameter" }
         return json.dumps(response, indent=4)
     youtube_id = extract_video_id_from_url(youtube_url)
     dispatchEvent('Receive youtube video:' + youtube_id, 'SUBMITTED')

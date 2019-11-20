@@ -1,4 +1,5 @@
 import os
+import flask
 import json
 import uuid
 import datetime
@@ -142,15 +143,19 @@ def get_youtube_url(request):
 
 # Function to extract summary ratio from request
 def get_summary_ratio(request):
+    ratio_default = 0.4
     if request.args and 'summary_ratio' in request.args:
         try:
             ratio = float(request.args.get('summary_ratio'))
             if ratio >= 0.1 and ratio <= 0.9:
                 return ratio
             else:
-                return 0.4
+                return ratio_default
         except Exception as e:
             print('Error: could not read summary_ratio from query string parameters')
+    else:
+        return ratio_default
+
 
 # Function to download youtube video. Stores video in GCS.
 def get_youtube_video(yt_link, output_filename):
@@ -244,6 +249,11 @@ def get_summary(input_filename, output_filename, ratio_summary=0.5):
 
 
 def main(request):
+    # Set CORS headers for the main request
+    headers = {
+        'Access-Control-Allow-Origin': '*'
+    }
+    # bulk of function
     youtube_url = get_youtube_url(request)
     if not youtube_url:
         print('ERROR: no youtube_url was provided. exiting')
@@ -252,6 +262,11 @@ def main(request):
             "error": "You must provide a valid youtube_url as a query string parameter" 
         }, indent=4)
     youtube_id = extract_video_id_from_url(youtube_url)
+    if not youtube_id:
+        return json.dumps({
+            "statusCode": 400,
+            "error": f'The youtube URL provided ({youtube_url}) is not valid.'
+        }, indent=4)
     # Get youtube video
     outfile_mp4 = youtube_id + '/audio.mp4'
     try: 
@@ -287,8 +302,17 @@ def main(request):
     ratio_summary = get_summary_ratio(request)
     text_summary = get_summary(outfile_full_text, outfile_summary, ratio_summary)
     # respond
-    return json.dumps({
+    response = flask.jsonify({
       "statusCode": 200, 
       "text": text_full,
       "summary": text_summary,
-    }, indent=4)
+    })
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST')
+    return response
+    # return json.dumps({
+    #   "statusCode": 200, 
+    #   "text": text_full,
+    #   "summary": text_summary,
+    #   "headers": headers,
+    # }, indent=4)
