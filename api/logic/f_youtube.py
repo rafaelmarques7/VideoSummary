@@ -27,4 +27,3 @@ def transform_audio_to_flac(input_filename, output_filename):
     mp4_audio.export(local_filename_transformed, format="flac")
     # Store file to GCS
     upload_blob(local_filename_transformed, output_filename)
-

@@ -1,48 +1,60 @@
 import flask
 from logic.gcs import gcs_file_exists
 from google.cloud import storage
-from urllib.parse import urlparse, parse_qs 
+from urllib.parse import urlparse, parse_qs
 
-
-# constants
-bucket_name = 'video_summary_bucket'
+# Constants
+BUCKET_NAME = 'video_summary_bucket'
+CODE_SUCCESS = 200
+CODE_USER_ERROR = 400
+CODE_INTERNAL_ERROR = 500
+SUMMARY_RATIO_DEFAULT = 0.3
 
 # GCS bucket handler
 storage_client = storage.Client()
-bucket = storage_client.get_bucket(bucket_name)
+bucket = storage_client.get_bucket(BUCKET_NAME)
 
 
 # Function to extract query string parameters
 def read_query_parameters(request):
-  """This function extracts the query parameters: youtube_url, youtube_id"""
-  youtube_url = None
-  if request.args and 'youtube_url' in request.args:
-    youtube_url = request.args.get('youtube_url') 
-  return { 
-    'youtube_url': youtube_url,
-    'youtube_id': extract_youtube_id_from_url(youtube_url),
-  }
+    """This function extracts the query parameters: youtube_url, youtube_id"""
+    # default values
+    youtube_url = None
+    summary_ratio = SUMMARY_RATIO_DEFAULT
+    # extract youtube_url
+    if request.args and 'youtube_url' in request.args:
+        youtube_url = request.args.get('youtube_url')
+    # extract summary_ratio
+    if request.args and 'summary_ratio' in request.args:
+        try:
+            ratio = float(request.args.get('summary_ratio'))
+            if ratio >= 0.1 and ratio <= 0.9:
+                summary_ratio = ratio
+        except:
+            print('summary_ratio provided can not be converted to float. using default ratio.')
+    # return all parameters
+    return {
+        'youtube_url': youtube_url,
+        'youtube_id': extract_youtube_id_from_url(youtube_url),
+        'summary_ratio': summary_ratio,
+    }
 
 
 # Function to get video id from youtube url
 def extract_youtube_id_from_url(url):
-    youtube_id =  None
+    youtube_id = None
     parsed_url = urlparse(url)
     qs = parse_qs(parsed_url.query)
-    if 'v' in qs.keys() and len(qs['v']) >= 1: 
+    if 'v' in qs.keys() and len(qs['v']) >= 1:
         youtube_id = qs['v'][0]
-    return youtube_id    
+    return youtube_id
 
 
 # This is the GCF entrypoint - which implements the API
 def main(request):
-  # read and unpack query string parameters
-  params = read_query_parameters(request)
-  youtube_url, youtube_id = params['youtube_url'], params['youtube_id']
-  # verify if video file exists in storage
-  outfile_mp4 = youtube_id + '/audio.mp4'
-  if gcs_file_exists(bucket, outfile_mp4):
-    print('file exists')
-  else: 
-    print('file does not exist')
-  return flask.jsonify({'statusCode': 200})    
+    
+    # Read and unpack query string parameters
+    params = read_query_parameters(request)
+    youtube_url, youtube_id, summary_ratio = params['youtube_url'], params['youtube_id'], params['summary_ratio']
+    
+    # Call f_youtube
