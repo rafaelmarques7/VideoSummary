@@ -50,11 +50,22 @@ def extract_youtube_id_from_url(url):
     return youtube_id
 
 
+# Helper function to return a response with status code and CORS headers
+def prepare_response(res_object, status_code):
+    response = flask.jsonify(res_object)
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST')
+    return response, status_code
+
+
 # This is the GCF entrypoint - which implements the API
 def main(request):
-    
     # Read and unpack query string parameters
     params = read_query_parameters(request)
     youtube_url, youtube_id, summary_ratio = params['youtube_url'], params['youtube_id'], params['summary_ratio']
-    
+    # Handle bad user input 
+    if not youtube_url or not youtube_id:
+        res = { 'error': 'You must provide a valid youtube_url as query string parameter' }
+        return prepare_response(res, CODE_USER_ERROR)
     # Call f_youtube
+

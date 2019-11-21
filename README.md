@@ -76,13 +76,14 @@ The **f_summary** function:
 
 ## ViS Frontend
 
-The ViS Frontend is a Website that allows a user to select a youtube_url that will be used to generate a full transcript and a short summary.
+The ViS Frontend is implemented by a Website that allows a user to select a youtube_url that will be used to generate a full transcript and a short summary.
 
 Features:
   * generates a full transcript based on youtube_url
   * generates a short summary based on youtube_url
   * handle errors gracefully
   * display loading info, status update and estimated processing time.
+  * display video information
 
 
 <hr />

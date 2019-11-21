@@ -2,7 +2,7 @@ from pytube import YouTube
 from pydub import AudioSegment
 
 
-# Function to download youtube video. Stores video in GCS.
+# Function to download youtube video. Stores video in GCS using.
 def get_youtube_video(yt_link, output_filename):
     print('inside get_youtube_video, youtube_link: ', yt_link)
     yt_object = YouTube(yt_link)
