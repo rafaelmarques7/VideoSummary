@@ -88,13 +88,24 @@ def gcs_upload_file(source_file_name, destination_blob_name):
     print('File {} uploaded to {}.'.format(source_file_name, destination_blob_name))
 
 
-# Function to download from GCS
+# Function to download from GCS to local file system
 def gcs_download_file(source_blob_name, destination_file_name):
     """Downloads a blob from the bucket."""
     print('inside gcs_download_file')
     blob = bucket.blob(source_blob_name)
     blob.download_to_filename(destination_file_name)
     print('File {} downloaded to {}.'.format(source_blob_name, destination_file_name))
+
+
+# Function to download from GCS to variable
+def read_file(self, filename):
+  self.response.write('Reading the full file contents:\n')
+
+  gcs_file = gcs.open(filename)
+  contents = gcs_file.read()
+  gcs_file.close()
+  self.response.write(contents)
+
 
 
 # Function to verify if file exists
