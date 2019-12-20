@@ -74,11 +74,12 @@ def prepare_response(res_object, status_code):
 
 # This is the GCF entrypoint - which implements the API
 def main(request):
-    
+    """ This is the entrypoint for the google cloud function. """ 
     # Read and unpack query string parameters
     params = read_query_parameters(request)
     youtube_url, summary_ratio = params['youtube_url'], params['summary_ratio']
     video_id = extract_video_id_from_url(youtube_url)
+    
     # Handle bad user input 
     if not youtube_url or not video_id:
         res = { 'error': 'You must provide a valid youtube_url as query string parameter' }

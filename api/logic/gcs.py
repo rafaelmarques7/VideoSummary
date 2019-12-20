@@ -107,7 +107,6 @@ def read_file(self, filename):
   self.response.write(contents)
 
 
-
 # Function to verify if file exists
 def gcs_file_exists(bucket, source_blob_name):
     """Function that verifies if a file exists in the GCS bucket"""
