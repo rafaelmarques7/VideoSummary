@@ -1,7 +1,8 @@
 import os
-import flask
 import json
 import uuid
+import pysrt
+import flask
 import datetime
 import traceback
 from pytube import YouTube
@@ -247,6 +248,25 @@ def get_summary(input_filename, output_filename, ratio_summary=0.5):
     blob.upload_from_string(body, content_type="text/plain")
     return str(body)
 
+
+# Function to extract youtube generated captions. Returns a filepath
+def get_youtube_captions(yt_link):
+    yt_object = YouTube(yt_link)
+    captions = yt_object.captions.all()[0].generate_srt_captions()
+    fpath_local = '/tmp/captions.srt'
+    with open(fpath_local, 'w') as f:
+        f.write(captions)
+    return fpath_local
+
+
+# Function to transform srt to txt. Returns a string
+def clean_youtube_captions(fpath_local, linebreak='\n'):
+    captions_text = ''
+    captions_srt = pysrt.open(fpath_local)
+    for sub in captions_srt:
+        captions_text = captions_text + sub.text + linebreak
+    return captions_text
+    
 
 def main(request):
     # Set CORS headers for the main request
