@@ -2,7 +2,7 @@ import traceback
 from pytube import YouTube
 from pydub import AudioSegment
 from .gcs import gcs_file_exists, gcs_upload_file
-from .helper import write_to_file
+from .helper import write_text_to_file, write_json_to_file
 from constants import BUCKET_NAME, CODE_SUCCESS, \
     CODE_USER_ERROR, CODE_INTERNAL_ERROR, SUMMARY_RATIO_DEFAULT
 
@@ -60,7 +60,7 @@ def get_youtube_captions(yt_instance):
     return fpath_local
 
 
-# Function to transform srt to txt. Returns a local filepath
+# Function to transform srt to txt. Returns captions_text, fpath_local.
 def clean_youtube_captions(fpath_local, linebreak='\n'):
     captions_text = ''
     captions_srt = pysrt.open(fpath_local)
@@ -68,7 +68,7 @@ def clean_youtube_captions(fpath_local, linebreak='\n'):
         captions_text = captions_text + sub.text + linebreak
     fpath_local = '/tmp/captions.txt'
 		write_to_file(captions_text, fpath_local)
-    return fpath_local
+    return captions_text, fpath_local
 
 
 # Youtube processing function
@@ -83,6 +83,7 @@ def f_youtube(youtube_url):
 		4) download and store video
 		5) convert video to audio (.flac)
 	""" 
+	
 	# Instantiate youtube object. This throws error if youtube_url is invalid.
 	try:
 		yt_instance = YouTube(youtube_url)
@@ -92,27 +93,32 @@ def f_youtube(youtube_url):
 			'traceback': str(traceback.format_exc()),
 		}	
 		return res, CODE_USER_ERROR
+	
 	# Get metadata and youtube_id
 	yt_metadata = youtube_get_metadata(yt_instance)
-	# return {}, 200
 	yt_id = yt_metadata['video_id']
+	
 	# The full path to the necessary files in the bucket 
 	bucket_path_video = f'{yt_id}/video.mp4'
 	bucket_path_audio = f'{yt_id}/audio.flac'	
 	bucket_path_metadata = f'{yt_id}/metadata.json'
 	bucket_path_captions = f'{yt_id}/captions.txt'
+
 	# Verify if metadata exists in GCS. Upload it if it does not.
 	if not gcs_file_exists(bucket_path_metadata):
-		# write to temporary file
 		local_fpath = '/tmp/metadata.json'
-		with open(local_fpath, 'w') as f:
-			json.dump(yt_metadata, f)
-		# upload file
+		write_json_to_file(yt_metadata, local_fpath)
 		gcs_upload_file(local_fpath, bucket_path_metadata)
 
 	# Get, process and upload youtube captions
 	fpath_captions_srt = get_youtube_captions(yt_instance)
-	fpath_captions_txt = clean_youtube_captions(fpath_captions_srt)
+	captions_txt, fpath_captions_txt = clean_youtube_captions(fpath_captions_srt)
 	gcs_upload_file(fpath_captions_txt, bucket_path_captions)
 
-	return {'uri_metada': bucket_path_metadata}, CODE_SUCCESS
+	# Build and return a response
+	res_obj = {
+		'url': youtube_url,
+		'metadata': yt_metadata,
+		'captions': captions_txt,
+	}
+	return res_obj, CODE_SUCCESS

@@ -75,6 +75,7 @@ def prepare_response(res_object, status_code):
 # This is the GCF entrypoint - which implements the API
 def main(request):
     """ This is the entrypoint for the google cloud function. """ 
+    
     # Read and unpack query string parameters
     params = read_query_parameters(request)
     youtube_url, summary_ratio = params['youtube_url'], params['summary_ratio']
@@ -87,15 +88,10 @@ def main(request):
     
     # Verify if video has been processed before and if the data is available
     if check_video_has_been_processed(video_id):
-        
-        res = {
-            'metadata': '',
-            'transcript': '',            
-            'summary': '',
-        }
+        # Download appropriate files and return a response 
 
     # Call f_youtube
     res_obj, res_code = f_youtube(youtube_url)
-    if res_code == CODE_USER_ERROR or res_code == CODE_INTERNAL_ERROR:
-        return prepare_response(res_obj, res_code)
+
+    # Return response
     return prepare_response(res_obj, res_code)
