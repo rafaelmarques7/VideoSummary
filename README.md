@@ -3,15 +3,43 @@
 ViS (read as *Vice*) is an API that produces a text summary of a video based on a youtube link.
 
 - [ViS - Video Summary](#vis---video-summary)
+  - [Issues](#issues)
   - [ViS API](#vis-api)
-    - [Function *f_api*](#function-fapi)
-    - [Function *f_youtube*](#function-fyoutube)
-    - [Function *f_transcript*](#function-ftranscript)
-    - [Function **f_summary**](#function-fsummary)
+    - [Function f_api](#function-fapi)
+    - [Function f_youtube](#function-fyoutube)
+    - [Function f_transcript](#function-ftranscript)
+    - [Function f_summary](#function-fsummary)
   - [ViS Frontend](#vis-frontend)
   - [Glossary](#glossary)
   - [Possibly useful links](#possibly-useful-links)
   - [Notes](#notes)
+  - [Video processing](#video-processing)
+  - [Possible refactors](#possible-refactors)
+
+
+<hr />
+
+## Issues
+
+* Currently (20/12/2019) there are issues with pytube:
+```
+from pytube import YouTube
+yt = YouTube('https://www.youtube.com/watch?v=DC471a9qrU4')
+Traceback (most recent call last):
+  File "<input>", line 1, in <module>
+  File "/home/rafael/PycharmProjects/BlackHatPython/venv/lib/python3.6/site-packages/pytube/__main__.py", line 88, in __init__
+    self.prefetch_init()
+  File "/home/rafael/PycharmProjects/BlackHatPython/venv/lib/python3.6/site-packages/pytube/__main__.py", line 97, in prefetch_init
+    self.init()
+  File "/home/rafael/PycharmProjects/BlackHatPython/venv/lib/python3.6/site-packages/pytube/__main__.py", line 143, in init
+    mixins.apply_descrambler(self.player_config_args, fmt)
+  File "/home/rafael/PycharmProjects/BlackHatPython/venv/lib/python3.6/site-packages/pytube/mixins.py", line 96, in apply_descrambler
+    for i in stream_data[key].split(',')
+KeyError: 'url_encoded_fmt_stream_map'
+```
+
+Pytube has multiple open issues regarding this error, f.e., https://github.com/nficano/pytube/issues/531 and https://github.com/nficano/pytube/issues/529.
+
 
 
 <hr />
